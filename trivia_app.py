@@ -1,11 +1,21 @@
 import tkinter as tk
-import customtkinter as ctk
-import requests, random
-from tkinter import font
 from html import unescape
+import random
+from tkinter import font
+import requests
+import customtkinter as ctk
 
 class App(tk.Tk):
     def __init__(self, title):
+        """
+        Initializes the object with a given title.
+
+        Parameters:
+            title (str): The title of the object.
+
+        Returns:
+            None
+        """
         super().__init__()
         self.styles = Styles()
         self.title(title)
@@ -13,13 +23,36 @@ class App(tk.Tk):
         self.score = 0
         self.startmenu = StartTriviaMenu(self, self.styles)
         self.resizable(False, False)
+        self.iconbitmap('Images/logo/logo-ico.ico')
         self.mainloop()
     def reset_app(self):
+        """
+        Reset the app by destroying all widgets.
+
+        Parameters:
+            None
+        
+        Returns:
+            None
+
+        Pseudocode:
+            1. Loop through each widget in the app's children
+            2. Destroy the widget
+        """
         for widget in self.winfo_children():
             widget.destroy()
 
 class Styles:
     def __init__(self):
+        """
+        Initializes the class and sets the initial values for the instance variables.
+
+        Parameters:
+            self (object): The instance of the class.
+        
+        Returns:
+            None
+        """
         self.h1 = font.Font(family='DFMaruGothic StdN W7', size=35, weight='bold')
         self.p = font.Font(family='DFMaruGothic StdN W7', size=20)
         # Tech Trivia
@@ -28,6 +61,16 @@ class Styles:
 
 class StartTriviaMenu(tk.Frame):
     def __init__(self, parent, styles):  
+        """
+        Initializes the object with the given parent widget and styles.
+
+        Parameters:
+            parent (Widget): The parent widget.
+            styles (Styles): The styles object.
+
+        Returns:
+            None
+        """
         super().__init__(parent)
         self.styles = styles
         self.h1 = self.styles.h1
@@ -38,6 +81,12 @@ class StartTriviaMenu(tk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
+        """
+        Creates and configures the widgets for the GUI.
+
+        Returns:
+            None
+        """
         # Frame
         main_frame = tk.Frame(self, bg='#4E55FF')
         main_frame.columnconfigure(0, weight=1)
@@ -82,11 +131,31 @@ class StartTriviaMenu(tk.Frame):
         )
 
     def startapp(self):
+        """
+        Start the app by hiding the current grid and creating a new instance of the MainTriviaMenu class.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
         self.grid_forget()
         self.mainmenu = MainTriviaMenu(self.master, self.styles, self.master.score)
 
 class MainTriviaMenu(tk.Frame):
     def __init__(self, parent, styles, score):
+        """
+        Initializes an instance of the class.
+
+        Args:
+            parent: The parent widget.
+            styles: The styles used for the widgets.
+            score: The score value.
+
+        Returns:
+            None.
+        """
         super().__init__(parent)
         self.styles = styles
         self.p = self.styles.p
@@ -95,6 +164,15 @@ class MainTriviaMenu(tk.Frame):
         self.create_widgets()
 
     def create_widgets(self):
+        """
+        Creates and configures the widgets for the user interface of the application.
+
+        Parameters:
+        - None
+
+        Returns:
+        - None
+        """
         main_frame = tk.Frame(self, bg='#4E55FF')
         main_frame.columnconfigure(0, weight=1)
 
@@ -168,18 +246,19 @@ class MainTriviaMenu(tk.Frame):
         ).grid(
             row=4,
             pady=10,
-            sticky='ew'
         )
 
     def startquiz(self):
+        """
+        Starts the quiz by retrieving quiz questions from an API based on the selected category and difficulty level.
+
+        Parameters:
+            self (Quiz): The Quiz object.
+        
+        Returns:
+            None
+        """
         # dictionary
-        category_dict = {
-            "Science: Computers": 18,
-            "Science: Gadgets": 30,
-            "Science: Nature": 17,
-            "Science: Mathematics": 19,
-            "Science: Geography": 22
-        }
 
         # convert combobox string to lowercase
         diff_link = self.diff.get()
@@ -187,6 +266,13 @@ class MainTriviaMenu(tk.Frame):
         diff_link = diff_link.lower()  # Updated line
         print(diff_link)
 
+        category_dict = {
+            "Science: Computers": 18,
+            "Science: Gadgets": 30,
+            "Science: Nature": 17,
+            "Science: Mathematics": 19,
+            "Science: Geography": 22
+        }
         self.selected_subject = self.category.get()
         print(self.selected_subject)
         category_id = category_dict[self.selected_subject]
@@ -200,6 +286,19 @@ class MainTriviaMenu(tk.Frame):
 
 class Question_1(tk.Frame):
     def __init__(self, parent, styles, quiz_json_url, score, selected_subject):
+        """
+        Initializes the object of the class.
+
+        Parameters:
+        - parent: The parent widget.
+        - styles: A dictionary of styles.
+        - quiz_json_url: The URL of the quiz JSON.
+        - score: The current score.
+        - selected_subject: The selected subject.
+
+        Returns:
+        None
+        """
         super().__init__(parent)
         self.grid(row=0, sticky='ew')
         self.styles = styles
@@ -252,6 +351,7 @@ class Question_1(tk.Frame):
             bg='#4E55FF',
             fg='#fff',
             wraplength=400,
+            anchor='w'
         ).grid(
             row=0,
             columnspan=2,
@@ -276,7 +376,7 @@ class Question_1(tk.Frame):
             ctk.CTkButton(
                 right_frame,
                 text=choice,
-                command=lambda choice=choice: self.check_answer(choice, correct_answer, main_frame),
+                command=lambda choice=choice: self.check_answer(choice, correct_answer, main_frame, right_frame),
                 font=('DDFMaruGothic StdN W7', 20),
                 fg_color='#F46146',
                 hover_color=('#F46146', '#DC573F'),
@@ -292,15 +392,15 @@ class Question_1(tk.Frame):
             )
             grid_index += 1
 
-    def check_answer(self, selected_choice, correct_answer, bottom_frame):
-        for button in bottom_frame.winfo_children():
+    def check_answer(self, selected_choice, correct_answer, main_frame, right_frame):
+        for button in right_frame.winfo_children():
             if isinstance(button, ctk.CTkButton):
                 button.configure(state=tk.DISABLED)
         if selected_choice == correct_answer:
             self.score += 1
             print(self.score)
             tk.Label(
-                bottom_frame,
+                main_frame,
                 bg='#4E55FF',
                 fg='#fff',
                 font=self.styles.p,
@@ -308,11 +408,12 @@ class Question_1(tk.Frame):
                 wraplength=400
             ).grid(
                 row=4,
-                columnspan=2
+                columnspan=2,
+                sticky='ew'
             )
 
             ctk.CTkButton(
-                bottom_frame,
+                main_frame,
                 text='Next',
                 command=self.next_q,
                 bg_color='#4E55FF',
@@ -324,10 +425,11 @@ class Question_1(tk.Frame):
                 row=5,
                 columnspan=2,
                 pady=5,
+                
             )
         else:
             tk.Label(
-                bottom_frame,
+                main_frame,
                 bg='#4E55FF',
                 fg='#fff',
                 font=self.styles.p,
@@ -338,7 +440,7 @@ class Question_1(tk.Frame):
                 columnspan=2
             )
             ctk.CTkButton(
-                bottom_frame,
+                main_frame,
                 text='Next',
                 command=self.next_q,
                 bg_color='#4E55FF',
@@ -411,6 +513,7 @@ class Question_2(tk.Frame):
             bg='#4E55FF',
             fg='#fff',
             wraplength=400,
+            anchor='w'
         ).grid(
             row=0,
             columnspan=2,
@@ -435,7 +538,7 @@ class Question_2(tk.Frame):
             ctk.CTkButton(
                 right_frame,
                 text=choice,
-                command=lambda choice=choice: self.check_answer(choice, correct_answer, main_frame),
+                command=lambda choice=choice: self.check_answer(choice, correct_answer, main_frame, right_frame),
                 font=('DDFMaruGothic StdN W7', 20),
                 fg_color='#F46146',
                 hover_color=('#F46146', '#DC573F'),
@@ -451,15 +554,15 @@ class Question_2(tk.Frame):
             )
             grid_index += 1
 
-    def check_answer(self, selected_choice, correct_answer, bottom_frame):
-        for button in bottom_frame.winfo_children():
+    def check_answer(self, selected_choice, correct_answer, main_frame, right_frame):
+        for button in right_frame.winfo_children():
             if isinstance(button, ctk.CTkButton):
                 button.configure(state=tk.DISABLED)
         if selected_choice == correct_answer:
             self.score += 1
             print(self.score)
             tk.Label(
-                bottom_frame,
+                main_frame,
                 bg='#4E55FF',
                 fg='#fff',
                 font=self.styles.p,
@@ -467,11 +570,12 @@ class Question_2(tk.Frame):
                 wraplength=400
             ).grid(
                 row=4,
-                columnspan=2
+                columnspan=2,
+                sticky='ew'
             )
 
             ctk.CTkButton(
-                bottom_frame,
+                main_frame,
                 text='Next',
                 command=self.next_q,
                 bg_color='#4E55FF',
@@ -486,7 +590,7 @@ class Question_2(tk.Frame):
             )
         else:
             tk.Label(
-                bottom_frame,
+                main_frame,
                 bg='#4E55FF',
                 fg='#fff',
                 font=self.styles.p,
@@ -497,7 +601,7 @@ class Question_2(tk.Frame):
                 columnspan=2
             )
             ctk.CTkButton(
-                bottom_frame,
+                main_frame,
                 text='Next',
                 command=self.next_q,  # Use self.next_q instead of next_q
                 bg_color='#4E55FF',
@@ -569,6 +673,7 @@ class Question_3(tk.Frame):
             bg='#4E55FF',
             fg='#fff',
             wraplength=400,
+            anchor='w'
         ).grid(
             row=0,
             columnspan=2,
@@ -593,7 +698,7 @@ class Question_3(tk.Frame):
             ctk.CTkButton(
                 right_frame,
                 text=choice,
-                command=lambda choice=choice: self.check_answer(choice, correct_answer, main_frame),
+                command=lambda choice=choice: self.check_answer(choice, correct_answer, main_frame, right_frame),
                 font=('DDFMaruGothic StdN W7', 20),
                 fg_color='#F46146',
                 hover_color=('#F46146', '#DC573F'),
@@ -609,15 +714,15 @@ class Question_3(tk.Frame):
             )
             grid_index += 1
 
-    def check_answer(self, selected_choice, correct_answer, bottom_frame):
-        for button in bottom_frame.winfo_children():
+    def check_answer(self, selected_choice, correct_answer, main_frame, right_frame):
+        for button in right_frame.winfo_children():
             if isinstance(button, ctk.CTkButton):
                 button.configure(state=tk.DISABLED)
         if selected_choice == correct_answer:
             self.score += 1
             print(self.score)
             tk.Label(
-                bottom_frame,
+                main_frame,
                 bg='#4E55FF',
                 fg='#fff',
                 font=self.styles.p,
@@ -625,11 +730,12 @@ class Question_3(tk.Frame):
                 wraplength=400
             ).grid(
                 row=4,
-                columnspan=2
+                columnspan=2,
+                sticky='ew'
             )
 
             ctk.CTkButton(
-                bottom_frame,
+                main_frame,
                 text='Next',
                 command=self.next_q,
                 bg_color='#4E55FF',
@@ -644,7 +750,7 @@ class Question_3(tk.Frame):
             )
         else:
             tk.Label(
-                bottom_frame,
+                main_frame,
                 bg='#4E55FF',
                 fg='#fff',
                 font=self.styles.p,
@@ -655,7 +761,7 @@ class Question_3(tk.Frame):
                 columnspan=2
             )
             ctk.CTkButton(
-                bottom_frame,
+                main_frame,
                 text='Next',
                 command=self.next_q,  # Use self.next_q instead of next_q
                 bg_color='#4E55FF',
@@ -727,6 +833,7 @@ class Question_4(tk.Frame):
             bg='#4E55FF',
             fg='#fff',
             wraplength=400,
+            anchor='w'
         ).grid(
             row=0,
             columnspan=2,
@@ -751,7 +858,7 @@ class Question_4(tk.Frame):
             ctk.CTkButton(
                 right_frame,
                 text=choice,
-                command=lambda choice=choice: self.check_answer(choice, correct_answer, main_frame),
+                command=lambda choice=choice: self.check_answer(choice, correct_answer, main_frame, right_frame),
                 font=('DDFMaruGothic StdN W7', 20),
                 fg_color='#F46146',
                 hover_color=('#F46146', '#DC573F'),
@@ -767,15 +874,15 @@ class Question_4(tk.Frame):
             )
             grid_index += 1
 
-    def check_answer(self, selected_choice, correct_answer, bottom_frame):
-        for button in bottom_frame.winfo_children():
+    def check_answer(self, selected_choice, correct_answer, main_frame, right_frame):
+        for button in right_frame.winfo_children():
             if isinstance(button, ctk.CTkButton):
                 button.configure(state=tk.DISABLED)
         if selected_choice == correct_answer:
             self.score += 1
             print(self.score)
             tk.Label(
-                bottom_frame,
+                main_frame,
                 bg='#4E55FF',
                 fg='#fff',
                 font=self.styles.p,
@@ -783,11 +890,12 @@ class Question_4(tk.Frame):
                 wraplength=400
             ).grid(
                 row=4,
-                columnspan=2
+                columnspan=2,
+                sticky='ew'
             )
 
             ctk.CTkButton(
-                bottom_frame,
+                main_frame,
                 text='Next',
                 command=self.next_q,
                 bg_color='#4E55FF',
@@ -802,7 +910,7 @@ class Question_4(tk.Frame):
             )
         else:
             tk.Label(
-                bottom_frame,
+                main_frame,
                 bg='#4E55FF',
                 fg='#fff',
                 font=self.styles.p,
@@ -813,7 +921,7 @@ class Question_4(tk.Frame):
                 columnspan=2
             )
             ctk.CTkButton(
-                bottom_frame,
+                main_frame,
                 text='Next',
                 command=self.next_q,  # Use self.next_q instead of next_q
                 bg_color='#4E55FF',
@@ -885,6 +993,7 @@ class Question_5(tk.Frame):
             bg='#4E55FF',
             fg='#fff',
             wraplength=400,
+            anchor='w'
         ).grid(
             row=0,
             columnspan=2,
@@ -909,7 +1018,7 @@ class Question_5(tk.Frame):
             ctk.CTkButton(
                 right_frame,
                 text=choice,
-                command=lambda choice=choice: self.check_answer(choice, correct_answer, main_frame),
+                command=lambda choice=choice: self.check_answer(choice, correct_answer, main_frame, right_frame),
                 font=('DDFMaruGothic StdN W7', 20),
                 fg_color='#F46146',
                 hover_color=('#F46146', '#DC573F'),
@@ -925,15 +1034,15 @@ class Question_5(tk.Frame):
             )
             grid_index += 1
 
-    def check_answer(self, selected_choice, correct_answer, bottom_frame):
-        for button in bottom_frame.winfo_children():
+    def check_answer(self, selected_choice, correct_answer, main_frame, right_frame):
+        for button in right_frame.winfo_children():
             if isinstance(button, ctk.CTkButton):
                 button.configure(state=tk.DISABLED)
         if selected_choice == correct_answer:
             self.score += 1
             print(self.score)
             tk.Label(
-                bottom_frame,
+                main_frame,
                 bg='#4E55FF',
                 fg='#fff',
                 font=self.styles.p,
@@ -941,11 +1050,12 @@ class Question_5(tk.Frame):
                 wraplength=400
             ).grid(
                 row=4,
-                columnspan=2
+                columnspan=2,
+                sticky='ew'
             )
 
             ctk.CTkButton(
-                bottom_frame,
+                main_frame,
                 text='Next',
                 command=self.next_q,
                 bg_color='#4E55FF',
@@ -960,7 +1070,7 @@ class Question_5(tk.Frame):
             )
         else:
             tk.Label(
-                bottom_frame,
+                main_frame,
                 bg='#4E55FF',
                 fg='#fff',
                 font=self.styles.p,
@@ -971,7 +1081,7 @@ class Question_5(tk.Frame):
                 columnspan=2
             )
             ctk.CTkButton(
-                bottom_frame,
+                main_frame,
                 text='Next',
                 command=self.next_q,  # Use self.next_q instead of next_q
                 bg_color='#4E55FF',
@@ -1030,7 +1140,6 @@ class Final(tk.Frame):
                 row=1,
                 columnspan=2,
                 pady=5,
-                sticky='ew'
             )
         else:
             tk.Label(
@@ -1059,13 +1168,10 @@ class Final(tk.Frame):
                 row=1,
                 columnspan = 2,
                 pady=5,
-                sticky='ew'
             )
-
-
 
     def play_again(self):
         self.grid_forget()
         self.startmenu = MainTriviaMenu(self.master, self.styles, self.master.score)
 
-App('Trivia Game App')
+App('TechBlaizer')
